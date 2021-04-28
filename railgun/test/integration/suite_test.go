@@ -43,6 +43,9 @@ const (
 
 	// httpcTimeout is the default client timeout for HTTP clients used in tests.
 	httpcTimeout = time.Second * 3
+
+	// ingressClass indicates the "kubernetes.io/ingress.class" which the tests will use for supported object reconcilation
+	ingressClass = "kongtests"
 )
 
 // -----------------------------------------------------------------------------
@@ -203,6 +206,7 @@ func deployControllers(ctx context.Context, ready chan ktfkind.ProxyReadinessEve
 				"--controller-kongplugin=disabled",
 				"--controller-kongconsumer=disabled",
 				"--election-id=integrationtests.konghq.com",
+				fmt.Sprintf("--ingress-class=%s", ingressClass),
 			})
 			fmt.Printf("config: %+v\n", config)
 

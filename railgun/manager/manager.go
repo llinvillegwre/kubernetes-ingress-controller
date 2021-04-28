@@ -10,6 +10,7 @@ import (
 
 	"github.com/kong/go-kong/kong"
 	"github.com/kong/kubernetes-ingress-controller/pkg/adminapi"
+	"github.com/kong/kubernetes-ingress-controller/pkg/annotations"
 	"github.com/kong/kubernetes-ingress-controller/pkg/sendconfig"
 	"github.com/kong/kubernetes-ingress-controller/pkg/util"
 	konghqcomv1 "github.com/kong/kubernetes-ingress-controller/railgun/apis/configuration/v1"
@@ -19,6 +20,7 @@ import (
 	kongctrl "github.com/kong/kubernetes-ingress-controller/railgun/controllers/configuration"
 	"github.com/kong/kubernetes-ingress-controller/railgun/controllers/corev1"
 	"github.com/kong/kubernetes-ingress-controller/railgun/internal/ctrlutils"
+	"github.com/kong/kubernetes-ingress-controller/railgun/internal/mgrutils"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -43,6 +45,7 @@ type Config struct {
 	FilterTag            string
 	Concurrency          int
 	KubeconfigPath       string
+	IngressClass         string
 
 	KongAdminAPIConfig adminapi.HTTPClientOpts
 
@@ -75,6 +78,7 @@ func MakeFlagSetFor(c *Config) *pflag.FlagSet {
 	flagSet.StringVar(&c.FilterTag, "kong-filter-tag", "managed-by-railgun", "TODO")
 	flagSet.IntVar(&c.Concurrency, "kong-concurrency", 10, "TODO")
 	flagSet.StringVar(&c.KubeconfigPath, "kubeconfig", "", "Path to the kubeconfig file.")
+	flagSet.StringVar(&c.IngressClass, "ingress-class", annotations.DefaultIngressClass, `Name of the ingress class to route through this controller.`)
 
 	flagSet.BoolVar(&c.KongAdminAPIConfig.TLSSkipVerify, "kong-admin-tls-skip-verify", false,
 		"Disable verification of TLS certificate of Kong's Admin endpoint.")
@@ -182,6 +186,11 @@ func Run(ctx context.Context, c *Config) error {
 		return fmt.Errorf("get kubeconfig from file %q: %w", c.KubeconfigPath, err)
 	}
 
+	// set "kubernetes.io/ingress.class" to be used by controllers (defaults to "kong")
+	mgrutils.IngressClass = c.IngressClass
+	setupLog.Info(`the "kubernetes.io/ingress.class" has been set`, "value", mgrutils.IngressClass)
+
+	// build the controller manager
 	mgr, err := ctrl.NewManager(kubeconfig, ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     c.MetricsAddr,

@@ -24,7 +24,7 @@ const KongIngressFinalizer = "configuration.konghq.com/ingress"
 // UpdateKongAdmin is a helper function to take the contents of a Kong config and update the Admin API with the parsed contents.
 func UpdateKongAdmin(ctx context.Context, kongCFG *sendconfig.Kong) error {
 	// build the kongstate object from the Kubernetes objects in the storer
-	storer := store.New(*mgrutils.CacheStores, "kong", false, false, false, logrus.StandardLogger())
+	storer := store.New(*mgrutils.CacheStores, mgrutils.IngressClass, false, false, false, logrus.StandardLogger())
 	kongstate, err := parser.Build(logrus.StandardLogger(), storer)
 	if err != nil {
 		return err
