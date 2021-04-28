@@ -46,6 +46,11 @@ const (
 
 	// ingressClass indicates the "kubernetes.io/ingress.class" which the tests will use for supported object reconcilation
 	ingressClass = "kongtests"
+
+	// httpBinImage is the container image name we use for deploying the "httpbin" HTTP testing tool.
+	// if you need a simple HTTP server for tests you're writing, use this and check the documentation.
+	// See: https://github.com/postmanlabs/httpbin
+	httpBinImage = "kennethreitz/httpbin"
 )
 
 // -----------------------------------------------------------------------------
