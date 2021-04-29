@@ -20,7 +20,6 @@ import (
 	kongctrl "github.com/kong/kubernetes-ingress-controller/railgun/controllers/configuration"
 	"github.com/kong/kubernetes-ingress-controller/railgun/controllers/corev1"
 	"github.com/kong/kubernetes-ingress-controller/railgun/internal/ctrlutils"
-	"github.com/kong/kubernetes-ingress-controller/railgun/internal/mgrutils"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -187,8 +186,7 @@ func Run(ctx context.Context, c *Config) error {
 	}
 
 	// set "kubernetes.io/ingress.class" to be used by controllers (defaults to "kong")
-	mgrutils.IngressClass = c.IngressClass
-	setupLog.Info(`the "kubernetes.io/ingress.class" has been set`, "value", mgrutils.IngressClass)
+	setupLog.Info(`the ingress class name has been set`, "value", c.IngressClass)
 
 	// build the controller manager
 	mgr, err := ctrl.NewManager(kubeconfig, ctrl.Options{
